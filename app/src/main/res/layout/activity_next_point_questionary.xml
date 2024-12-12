@@ -17,8 +17,7 @@
         app:layout_constraintHeight_percent="0.15"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:weightSum="3"
-        >
+        android:weightSum="3">
 
         <TextView
             android:id="@+id/texto_pintia_tour"
@@ -44,6 +43,7 @@
             app:layout_constraintTop_toTopOf="parent"
             android:weightSum="2"
             >
+
             <TextView
                 android:id="@+id/texto_visita_express_o_personalizada_punto_siguiente_cuestionario"
                 android:layout_width="wrap_content"
@@ -59,6 +59,7 @@
                 android:layout_marginStart="20dp"
                 >
             </TextView>
+
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/boton_salir"
                 android:layout_marginStart="10dp"
@@ -73,7 +74,6 @@
                 android:backgroundTint="@color/red_darker"
                 >
             </com.google.android.material.floatingactionbutton.FloatingActionButton>
-
         </androidx.appcompat.widget.LinearLayoutCompat>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
@@ -155,7 +155,7 @@
                         android:backgroundTint="@color/green_dark"
                         android:layout_marginStart="15dp"
                         android:layout_marginEnd="50dp"
-                         />
+                        />
 
                     <com.google.android.material.floatingactionbutton.FloatingActionButton
                         android:id="@+id/boton_flecha_siguiente_imagen"
