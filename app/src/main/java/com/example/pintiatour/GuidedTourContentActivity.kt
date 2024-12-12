@@ -17,7 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlin.random.Random
 
 class GuidedTourContentActivity : AppCompatActivity() {
-    private lateinit var mp : MediaPlayer
+    private lateinit var audioIntent: Intent
     private var idiomaSeleccionado: String? = "esp"
     private var tour: IntArray? = IntArray(0)
     private var posicion: Int? = 0
@@ -29,6 +29,18 @@ class GuidedTourContentActivity : AppCompatActivity() {
     private lateinit var textoConsejo: TextView
     private lateinit var imageViewContenido: ImageView
 
+    /**
+     * Método llamado cuando se crea la actividad.
+     *
+     * Este es el punto de entrada principal para la actividad. Se encarga de:
+     *
+     * - Inicializar la interfaz de usuario y configurar el audio de fondo.
+     * - Recuperar los datos de la sesión pasados a través del Intent, como la información sobre el idioma y la visita.
+     * - Inicializar los componentes gráficos de la actividad, como botones y vistas interactivas.
+     * - Configurar los listeners para manejar las interacciones con los elementos de la interfaz.
+     * - Modificar los componentes según sea necesario y actualizar el temporizador.
+     * - Ajustar los márgenes para tener en cuenta las barras del sistema (e.g. barras de estado y navegación) con un diseño sin bordes.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val i: Int = Random.nextInt(1, 16)  // Genera un número aleatorio entre 1 y 9.
@@ -36,9 +48,12 @@ class GuidedTourContentActivity : AppCompatActivity() {
         // Construye dinámicamente el identificador del recurso
         val resId = resources.getIdentifier("music$i", "raw", packageName)
 
-        mp=MediaPlayer.create(this, resId)
-        mp.start()
-        mp.isLooping = true
+        audioIntent = Intent(this, AudioService::class.java)
+        audioIntent.putExtra("AUDIO_RES_ID", resId) // Recurso de audio
+        audioIntent.putExtra("ACTION", "PLAY_BACKGROUND")// Indica que debe reproducirse en bucle
+        audioIntent.putExtra("IS_LOOPING", true)
+        startService(audioIntent)
+        // Habilita el diseño sin bordes (full-screen) para la actividad
         enableEdgeToEdge()
         setContentView(R.layout.activity_guided_tour_content)
         getSessionData()
@@ -52,34 +67,35 @@ class GuidedTourContentActivity : AppCompatActivity() {
     }
 
     /**
+     * Libera los recursos del MediaPlayer al destruir la actividad.
+     * Este método asegura que el MediaPlayer se libere correctamente cuando la actividad se destruye
+     * para evitar fugas de memoria.
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        audioIntent.putExtra("ACTION", "STOP")
+        startService(audioIntent)
+    }
+
+    /**
+     * Detiene la reproducción del audio y libera los recursos del MediaPlayer al pausar la actividad.
+     * Este método asegura que el audio se detenga y se liberen los recursos utilizados por el MediaPlayer
+     * cuando la actividad pasa a segundo plano.
+     */
+    override fun onPause() {
+        super.onPause()
+        audioIntent.putExtra("ACTION", "PAUSE")
+        startService(audioIntent)
+    }
+
+    /**
      * Reanuda la reproducción del audio cuando la actividad vuelve a primer plano.
      * Verifica si el reproductor no está reproduciendo y lo inicia.
      */
     override fun onResume() {
         super.onResume()
-        if (!mp.isPlaying) {
-            mp.start()
-        }
-    }
-
-    /**
-     * Pausa la reproducción del audio cuando la actividad pasa a segundo plano.
-     * Verifica si el reproductor está reproduciendo y lo detiene temporalmente.
-     */
-    override fun onPause() {
-        super.onPause()
-        if (mp.isPlaying) {
-            mp.pause()
-        }
-    }
-
-    /**
-     * Libera los recursos del MediaPlayer al destruir la actividad.
-     * Esto asegura que no haya fugas de memoria relacionadas con el reproductor.
-     */
-    override fun onDestroy() {
-        super.onDestroy()
-        mp.release()
+        audioIntent.putExtra("ACTION", "RESUME")
+        startService(audioIntent)
     }
 
     /**
@@ -257,7 +273,8 @@ class GuidedTourContentActivity : AppCompatActivity() {
      */
     private fun initListeners() {
         btnVolver.setOnClickListener {
-            mp.stop()
+            audioIntent.putExtra("ACTION", "STOP")
+            startService(audioIntent)
             val siguientePantalla: Intent= if (posicion == 0){
                 Intent(this, SelectRolActivity::class.java)
             } else {
@@ -271,7 +288,8 @@ class GuidedTourContentActivity : AppCompatActivity() {
         }
 
         btnSiguiente.setOnClickListener {
-            mp.stop()
+            audioIntent.putExtra("ACTION", "STOP")
+            startService(audioIntent)
             val siguientePantalla: Intent = if (tour?.size == (posicion!! + 1)) {
                 Intent(this, ShowFinalGuidedPointActivity::class.java)
             } else {
@@ -285,7 +303,8 @@ class GuidedTourContentActivity : AppCompatActivity() {
         }
 
         btnSalir.setOnClickListener{
-            mp.stop()
+            audioIntent.putExtra("ACTION", "STOP")
+            startService(audioIntent)
             var siguientePantalla = Intent(this, SelectVisitActivity::class.java)
             navigateToNextScreen(siguientePantalla) // Finaliza l
         }

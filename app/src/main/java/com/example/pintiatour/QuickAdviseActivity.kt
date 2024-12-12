@@ -1,8 +1,11 @@
 package com.example.pintiatour
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -19,7 +22,6 @@ class QuickAdviseActivity : AppCompatActivity() {
     private lateinit var textoConsejoVisita: TextView
     private lateinit var gifMovilRotate: ImageView
     private lateinit var btnVolver: Button
-    private lateinit var btnSiguiente: Button
     private var idiomaSeleccionado: String? = ""
     private var visitaExpress: String? = ""
     private var visitaPersonalizada: String? = ""
@@ -30,6 +32,8 @@ class QuickAdviseActivity : AppCompatActivity() {
     private var coleccionPantallas = mutableListOf<Pantalla>()
     private var numPantallasContenidoTematica: Int = 0
     private lateinit var mp: MediaPlayer
+    private var orientationChangeHandler: Handler? = null
+    private var orientationRunnable: Runnable? = null
 
 
     /**
@@ -107,7 +111,6 @@ class QuickAdviseActivity : AppCompatActivity() {
 
         // Inicializa los botones de navegación
         btnVolver = findViewById(R.id.boton_regresar_visita_express)
-        btnSiguiente = findViewById(R.id.boton_siguiente_pantalla_express)
     }
 
     /**
@@ -115,8 +118,8 @@ class QuickAdviseActivity : AppCompatActivity() {
      *
      * Este método se encarga de establecer los eventos (listeners) para los botones de navegación
      * en la actividad. Cuando el usuario hace clic en "Volver", se navega a la actividad correspondiente
-     * dependiendo de si la visita es "express" o "personalizada". Al hacer clic en "Siguiente",
-     * se navega a la actividad que muestra el primer punto de la visita.
+     * dependiendo de si la visita es "express" o "personalizada". Al girar el movila a horizontal
+     * se pasa a la actividad siguiente
      */
     private fun initListeners() {
         // Configura el listener para el botón "Volver"
@@ -137,19 +140,8 @@ class QuickAdviseActivity : AppCompatActivity() {
             navigateToNextScreen(siguientePantalla)
         }
 
-        // Configura el listener para el botón "Siguiente"
-        btnSiguiente.setOnClickListener {
-            mp.release()
-            if (visitaGuiada != ""){
-                val siguientePantalla = Intent(this, ShowInitialGuidedPointActivity::class.java)
-                navigateToNextScreen(siguientePantalla)
-            } else{
-                val siguientePantalla = Intent(this, coleccionPantallas[0].activityClass)
-                navigateToNextScreen(siguientePantalla)
-            }
-
-        }
     }
+
 
     /**
      * Navega a la siguiente pantalla pasando los datos de la sesión a través del Intent.
@@ -247,7 +239,6 @@ class QuickAdviseActivity : AppCompatActivity() {
 
         textoConsejoVisita.text = getString(languageResources["textoConsejoVisita"] ?: R.string.texto_consejo_girar_movil)
         btnVolver.text = getString(languageResources["btnVolver"] ?: R.string.texto_boton_regresar)
-        btnSiguiente.text = getString(languageResources["btnSiguiente"] ?: R.string.texto_boton_siguiente)
     }
 
     /**
@@ -367,6 +358,45 @@ class QuickAdviseActivity : AppCompatActivity() {
 
 
 
+    }
+
+    /**
+     * Se invoca cuando cambia la configuración del dispositivo (por ejemplo, la orientación de la pantalla).
+     * Este método maneja los cambios de orientación de manera eficiente, evitando ejecuciones repetidas
+     * en caso de cambios rápidos. También inicia una acción específica después de un retraso de 1 segundo
+     * si la orientación es horizontal.
+     */
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        // Cancelar cualquier ejecución anterior si la orientación cambia rápidamente
+        orientationRunnable?.let { orientationChangeHandler?.removeCallbacks(it) }
+
+        // Crear un temporizador de 1 segundo
+        orientationChangeHandler = Handler(Looper.getMainLooper())
+        orientationRunnable = Runnable {
+            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                mp.release()
+                if (visitaGuiada != ""){
+                    val siguientePantalla = Intent(this, ShowInitialGuidedPointActivity::class.java)
+                    navigateToNextScreen(siguientePantalla)
+                } else{
+                    val siguientePantalla = Intent(this, coleccionPantallas[0].activityClass)
+                    navigateToNextScreen(siguientePantalla)
+                }
+            }
+        }
+        orientationChangeHandler?.postDelayed(orientationRunnable!!, 1000) // 1 segundo
+    }
+
+    /**
+     * Se invoca cuando la actividad se destruye. Este método asegura que se limpien los recursos asociados
+     * con el `Handler` y los `Runnable` para prevenir fugas de memoria.
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        // Limpiar el handler para evitar fugas de memoria
+        orientationRunnable?.let { orientationChangeHandler?.removeCallbacks(it) }
     }
 
 }

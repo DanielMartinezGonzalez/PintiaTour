@@ -13,7 +13,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlin.random.Random
 
 class ShowInitialGuidedPointActivity : AppCompatActivity() {
-    private lateinit var mp1: MediaPlayer
+
     private var idiomaSeleccionado: String? = "esp"
     private var codigo: BooleanArray? = null
     private lateinit var tour: IntArray
@@ -21,18 +21,17 @@ class ShowInitialGuidedPointActivity : AppCompatActivity() {
     private lateinit var btnSiguiente: Button
     private lateinit var btnSalir: FloatingActionButton
     private lateinit var textoInicial: TextView
+    private lateinit var textoTitulo: TextView
+    private lateinit var audioIntent: Intent
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val i: Int = Random.nextInt(1, 16)  // Genera un número aleatorio entre 1 y 9.
-
-        // Construye dinámicamente el identificador del recurso
-        val resId = resources.getIdentifier("music$i", "raw", packageName)
-
         // Crea y reproduce el MediaPlayer
-        mp1 = MediaPlayer.create(this, resId)
-        mp1.start()
-        mp1.isLooping=true
+        audioIntent = Intent(this, AudioService::class.java)
+        audioIntent.putExtra("AUDIO_RES_ID", R.raw.flute) // Recurso de audio
+        audioIntent.putExtra("ACTION", "PLAY_BACKGROUND")// Indica que debe reproducirse en bucle
+        audioIntent.putExtra("IS_LOOPING", true)
+        startService(audioIntent)
         enableEdgeToEdge()
         setContentView(R.layout.activity_show_initial_guided_point)
         getSessionData()
@@ -46,34 +45,35 @@ class ShowInitialGuidedPointActivity : AppCompatActivity() {
     }
 
     /**
+     * Libera los recursos del MediaPlayer al destruir la actividad.
+     * Este método asegura que el MediaPlayer se libere correctamente cuando la actividad se destruye
+     * para evitar fugas de memoria.
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        audioIntent.putExtra("ACTION", "STOP")
+        startService(audioIntent)
+    }
+
+    /**
+     * Detiene la reproducción del audio y libera los recursos del MediaPlayer al pausar la actividad.
+     * Este método asegura que el audio se detenga y se liberen los recursos utilizados por el MediaPlayer
+     * cuando la actividad pasa a segundo plano.
+     */
+    override fun onPause() {
+        super.onPause()
+        audioIntent.putExtra("ACTION", "PAUSE")
+        startService(audioIntent)
+    }
+
+    /**
      * Reanuda la reproducción del audio cuando la actividad vuelve a primer plano.
      * Verifica si el reproductor no está reproduciendo y lo inicia.
      */
     override fun onResume() {
         super.onResume()
-        if (!mp1.isPlaying) {
-            mp1.start()  // Reanuda la reproducción del audio
-        }
-    }
-
-    /**
-     * Pausa la reproducción del audio cuando la actividad pasa a segundo plano.
-     * Verifica si el reproductor está reproduciendo y lo detiene temporalmente.
-     */
-    override fun onPause() {
-        super.onPause()
-        if (mp1.isPlaying) {
-            mp1.pause()  // Pausa la reproducción del audio
-        }
-    }
-
-    /**
-     * Libera los recursos del MediaPlayer al destruir la actividad.
-     * Esto asegura que no haya fugas de memoria relacionadas con el reproductor.
-     */
-    override fun onDestroy() {
-        super.onDestroy()
-        mp1.release()
+        audioIntent.putExtra("ACTION", "RESUME")
+        startService(audioIntent)
     }
 
     /**
@@ -95,6 +95,7 @@ class ShowInitialGuidedPointActivity : AppCompatActivity() {
     private fun initComponents(){
         btnVolver = findViewById(R.id.boton_regresar_visita_guiada)
         btnSiguiente = findViewById(R.id.boton_siguiente_visita_guiada)
+        textoTitulo = findViewById(R.id.texto_visita_express_o_personalizada_punto_inicial)
         textoInicial = findViewById(R.id.texto_punto_inicial)
         btnSalir= findViewById(R.id.boton_salir)
 
@@ -116,21 +117,25 @@ class ShowInitialGuidedPointActivity : AppCompatActivity() {
     private fun changeLanguage() {
         when (this.idiomaSeleccionado) {
             "esp" -> {
+                textoTitulo.text = getString(R.string.texto_visita_express)
                 btnVolver.text = getString(R.string.texto_boton_regresar)
                 btnSiguiente.text = getString(R.string.texto_boton_siguiente)
                 textoInicial.text = getString(R.string.texto_inicial_visita_guiada)
             }
             "eng" -> {
+                textoTitulo.text = getString(R.string.texto_visita_express_eng)
                 btnVolver.text = getString(R.string.texto_boton_regresar_eng)
                 btnSiguiente.text = getString(R.string.texto_boton_siguiente_eng)
                 textoInicial.text = getString(R.string.texto_inicial_visita_guiada_eng)
             }
             "deu" -> {
+                textoTitulo.text = getString(R.string.texto_visita_express_deu)
                 btnVolver.text = getString(R.string.texto_boton_regresar_deu)
                 btnSiguiente.text = getString(R.string.texto_boton_siguiente_deu)
                 textoInicial.text = getString(R.string.texto_inicial_visita_guiada_deu)
             }
             "fra" -> {
+                textoTitulo.text = getString(R.string.texto_visita_express_fra)
                 btnVolver.text = getString(R.string.texto_boton_regresar_fra)
                 btnSiguiente.text = getString(R.string.texto_boton_siguiente_fra)
                 textoInicial.text = getString(R.string.texto_inicial_visita_guiada_fra)
@@ -148,13 +153,15 @@ class ShowInitialGuidedPointActivity : AppCompatActivity() {
      */
     private fun initListeners() {
         btnVolver.setOnClickListener {
-            mp1.stop()
+            audioIntent.putExtra("ACTION", "STOP")
+            startService(audioIntent)
             val siguientePantalla = Intent(this, SelectRolActivity::class.java)
             navigateToNextScreen(siguientePantalla)
         }
 
         btnSiguiente.setOnClickListener {
-            mp1.stop()
+            audioIntent.putExtra("ACTION", "STOP")
+            startService(audioIntent)
             val siguientePantalla = Intent(this, GuidedTourContentActivity::class.java)
             siguientePantalla.putExtra("tour", tour)
             siguientePantalla.putExtra("posicion", 0)
@@ -162,7 +169,8 @@ class ShowInitialGuidedPointActivity : AppCompatActivity() {
         }
 
         btnSalir.setOnClickListener{
-            mp1.stop()
+            audioIntent.putExtra("ACTION", "STOP")
+            startService(audioIntent)
             var siguientePantalla = Intent(this, SelectVisitActivity::class.java)
             navigateToNextScreen(siguientePantalla) // Finaliza l
         }

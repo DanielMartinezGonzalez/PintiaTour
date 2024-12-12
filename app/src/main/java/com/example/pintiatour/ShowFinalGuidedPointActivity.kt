@@ -12,17 +12,23 @@ import androidx.core.view.WindowInsetsCompat
 
 class ShowFinalGuidedPointActivity : AppCompatActivity() {
 
-    private lateinit var mp : MediaPlayer
+
     private var idiomaSeleccionado: String? = "esp"
     private var tour: IntArray? = IntArray(0)
     private lateinit var btnVolver: Button
     private lateinit var btnSiguiente: Button
     private lateinit var textoInicial: TextView
+    private lateinit var textoTitulo: TextView
+    private lateinit var audioIntent: Intent
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mp= MediaPlayer.create(this,R.raw.turnhorizontal)
-        mp.start()
+        // Crea y reproduce el MediaPlayer
+        audioIntent = Intent(this, AudioService::class.java)
+        audioIntent.putExtra("AUDIO_RES_ID", R.raw.flute) // Recurso de audio
+        audioIntent.putExtra("ACTION", "PLAY_BACKGROUND")// Indica que debe reproducirse en bucle
+        audioIntent.putExtra("IS_LOOPING", true)
+        startService(audioIntent)
         enableEdgeToEdge()
         setContentView(R.layout.activity_show_initial_guided_point)
         getSessionData()
@@ -36,34 +42,35 @@ class ShowFinalGuidedPointActivity : AppCompatActivity() {
     }
 
     /**
+     * Libera los recursos del MediaPlayer al destruir la actividad.
+     * Este método asegura que el MediaPlayer se libere correctamente cuando la actividad se destruye
+     * para evitar fugas de memoria.
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        audioIntent.putExtra("ACTION", "STOP")
+        startService(audioIntent)
+    }
+
+    /**
+     * Detiene la reproducción del audio y libera los recursos del MediaPlayer al pausar la actividad.
+     * Este método asegura que el audio se detenga y se liberen los recursos utilizados por el MediaPlayer
+     * cuando la actividad pasa a segundo plano.
+     */
+    override fun onPause() {
+        super.onPause()
+        audioIntent.putExtra("ACTION", "PAUSE")
+        startService(audioIntent)
+    }
+
+    /**
      * Reanuda la reproducción del audio cuando la actividad vuelve a primer plano.
      * Verifica si el reproductor no está reproduciendo y lo inicia.
      */
     override fun onResume() {
         super.onResume()
-        if (!mp.isPlaying) {
-            mp.start()
-        }
-    }
-
-    /**
-     * Pausa la reproducción del audio cuando la actividad pasa a segundo plano.
-     * Verifica si el reproductor está reproduciendo y lo detiene temporalmente.
-     */
-    override fun onPause() {
-        super.onPause()
-        if (mp.isPlaying) {
-            mp.pause()
-        }
-    }
-
-    /**
-     * Libera los recursos del MediaPlayer al destruir la actividad.
-     * Esto asegura que no haya fugas de memoria relacionadas con el reproductor.
-     */
-    override fun onDestroy() {
-        super.onDestroy()
-        mp.release()
+        audioIntent.putExtra("ACTION", "RESUME")
+        startService(audioIntent)
     }
 
     /**
@@ -86,7 +93,7 @@ class ShowFinalGuidedPointActivity : AppCompatActivity() {
         btnVolver = findViewById(R.id.boton_regresar_visita_guiada)
         btnSiguiente = findViewById(R.id.boton_siguiente_visita_guiada)
         textoInicial = findViewById(R.id.texto_punto_inicial)
-
+        textoTitulo = findViewById(R.id.texto_visita_express_o_personalizada_punto_inicial)
 
         changeLanguage()
     }
@@ -105,21 +112,25 @@ class ShowFinalGuidedPointActivity : AppCompatActivity() {
     private fun changeLanguage() {
         when (this.idiomaSeleccionado) {
             "esp" -> {
+                textoTitulo.text = getString(R.string.texto_visita_express)
                 btnVolver.text = getString(R.string.texto_boton_regresar)
                 btnSiguiente.text = getString(R.string.texto_boton_fin_visita)
                 textoInicial.text = getString(R.string.texto_fin_visita)
             }
             "eng" -> {
+                textoTitulo.text = getString(R.string.texto_visita_express_eng)
                 btnVolver.text = getString(R.string.texto_boton_regresar_eng)
                 btnSiguiente.text = getString(R.string.texto_boton_fin_visita_eng)
                 textoInicial.text = getString(R.string.texto_fin_visita_eng)
             }
             "deu" -> {
+                textoTitulo.text = getString(R.string.texto_visita_express_deu)
                 btnVolver.text = getString(R.string.texto_boton_regresar_deu)
                 btnSiguiente.text = getString(R.string.texto_boton_fin_visita_deu)
                 textoInicial.text = getString(R.string.texto_fin_visita_deu)
             }
             "fra" -> {
+                textoTitulo.text = getString(R.string.texto_visita_express_fra)
                 btnVolver.text = getString(R.string.texto_boton_regresar_fra)
                 btnSiguiente.text = getString(R.string.texto_boton_fin_visita_fra)
                 textoInicial.text = getString(R.string.texto_fin_visita_fra)
@@ -137,6 +148,8 @@ class ShowFinalGuidedPointActivity : AppCompatActivity() {
      */
     private fun initListeners() {
         btnVolver.setOnClickListener {
+            audioIntent.putExtra("ACTION", "STOP")
+            startService(audioIntent)
             val siguientePantalla = Intent(this, GuidedTourContentActivity::class.java)
             siguientePantalla.putExtra("tour", tour)
             siguientePantalla.putExtra("posicion", tour?.size?.minus(1))
@@ -144,6 +157,8 @@ class ShowFinalGuidedPointActivity : AppCompatActivity() {
         }
 
         btnSiguiente.setOnClickListener {
+            audioIntent.putExtra("ACTION", "STOP")
+            startService(audioIntent)
             val siguientePantalla = Intent(this, SelectVisitActivity::class.java)
             navigateToNextScreen(siguientePantalla)
         }

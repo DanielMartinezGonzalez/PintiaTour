@@ -29,12 +29,11 @@ class SelectVisitActivity : AppCompatActivity() {
     private lateinit var textoVisitaGuidada: TextView
     private lateinit var cardViewContacto: CardView
     private lateinit var textoContacto: TextView
-    private lateinit var mp: MediaPlayer
+    private lateinit var audioIntent: Intent
 
     /**
      * Inicializa la actividad configurando la interfaz, datos de sesión, y ajustes visuales.
      *
-     * - Configura el reproductor de audio (`MediaPlayer`) con reproducción en bucle.
      * - Habilita el modo "Edge-to-Edge" para maximizar el uso de pantalla.
      * - Establece el diseño principal (`R.layout.activity_select_visit`).
      * - Recupera datos de sesión (como el idioma) y configura componentes y listeners.
@@ -42,8 +41,11 @@ class SelectVisitActivity : AppCompatActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mp = MediaPlayer.create(this,R.raw.softpiano)
-        mp.isLooping = true
+        audioIntent = Intent(this, AudioService::class.java)
+        audioIntent.putExtra("AUDIO_RES_ID", R.raw.softpiano) // Recurso de audio
+        audioIntent.putExtra("ACTION", "PLAY_BACKGROUND")
+        audioIntent.putExtra("IS_LOOPING", true)
+        startService(audioIntent)
         enableEdgeToEdge()
         setContentView(R.layout.activity_select_visit)
         getSessionData()
@@ -57,34 +59,36 @@ class SelectVisitActivity : AppCompatActivity() {
     }
 
     /**
+     * Libera los recursos del MediaPlayer cuando la actividad es destruida.
+     * Este método se llama cuando la actividad está a punto de ser destruida, asegurándose de que
+     * los recursos del MediaPlayer sean liberados correctamente para evitar fugas de memoria.
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        audioIntent.putExtra("ACTION", "STOP") // Libera los recursos del MediaPlayer
+        startService(intent)
+    }
+
+    /**
      * Reanuda la reproducción del audio cuando la actividad vuelve a primer plano.
      * Verifica si el reproductor no está reproduciendo y lo inicia.
      */
     override fun onResume() {
         super.onResume()
-        if (!mp.isPlaying) {
-            mp.start()
-        }
+        audioIntent.putExtra("ACTION", "RESUME")
+        startService(audioIntent)
     }
 
     /**
-     * Pausa la reproducción del audio cuando la actividad pasa a segundo plano.
-     * Verifica si el reproductor está reproduciendo y lo detiene temporalmente.
+     * Detiene la reproducción y libera los recursos del MediaPlayer cuando la actividad pasa a segundo plano.
+     * Este método se llama cuando la actividad entra en pausa, asegurándose de que el MediaPlayer se detenga
+     * y libere sus recursos si estaba en uso.
      */
     override fun onPause() {
         super.onPause()
-        if (mp.isPlaying) {
-            mp.pause()
-        }
-    }
-
-    /**
-     * Libera los recursos del MediaPlayer al destruir la actividad.
-     * Esto asegura que no haya fugas de memoria relacionadas con el reproductor.
-     */
-    override fun onDestroy() {
-        super.onDestroy()
-        mp.release()
+        // Enviar la señal para pausar la música
+        audioIntent.putExtra("ACTION", "PAUSE")
+        startService(audioIntent)
     }
 
     /**

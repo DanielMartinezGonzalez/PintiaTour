@@ -21,7 +21,7 @@ class CreateGuidedTourActivity : AppCompatActivity() {
     private lateinit var btnVolver: Button
     private lateinit var btnSiguiente: Button
     private lateinit var checkBoxContainer: LinearLayoutCompat
-    private lateinit var mp : MediaPlayer
+    private lateinit var audioIntent: Intent
     private var idiomaSeleccionado: String? = "esp"
 
     /**
@@ -31,8 +31,11 @@ class CreateGuidedTourActivity : AppCompatActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mp = MediaPlayer.create(this,R.raw.softpiano)
-        mp.isLooping = true
+        audioIntent = Intent(this, AudioService::class.java)
+        audioIntent.putExtra("AUDIO_RES_ID", R.raw.softpiano) // Recurso de audio
+        audioIntent.putExtra("ACTION", "PLAY_BACKGROUND")
+        audioIntent.putExtra("IS_LOOPING", true)
+        startService(audioIntent)
         enableEdgeToEdge()
         setContentView(R.layout.activity_create_guided_tour)
         getSessionData() // Obtiene los datos de la sesión actual
@@ -46,34 +49,36 @@ class CreateGuidedTourActivity : AppCompatActivity() {
     }
 
     /**
+     * Libera los recursos del MediaPlayer cuando la actividad es destruida.
+     * Este método se llama cuando la actividad está a punto de ser destruida, asegurándose de que
+     * los recursos del MediaPlayer sean liberados correctamente para evitar fugas de memoria.
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        audioIntent.putExtra("ACTION", "STOP") // Libera los recursos del MediaPlayer
+        startService(intent)
+    }
+
+    /**
      * Reanuda la reproducción del audio cuando la actividad vuelve a primer plano.
      * Verifica si el reproductor no está reproduciendo y lo inicia.
      */
     override fun onResume() {
         super.onResume()
-        if (!mp.isPlaying) {
-            mp.start()
-        }
+        audioIntent.putExtra("ACTION", "RESUME")
+        startService(audioIntent)
     }
 
     /**
-     * Pausa la reproducción del audio cuando la actividad pasa a segundo plano.
-     * Verifica si el reproductor está reproduciendo y lo detiene temporalmente.
+     * Detiene la reproducción y libera los recursos del MediaPlayer cuando la actividad pasa a segundo plano.
+     * Este método se llama cuando la actividad entra en pausa, asegurándose de que el MediaPlayer se detenga
+     * y libere sus recursos si estaba en uso.
      */
     override fun onPause() {
         super.onPause()
-        if (mp.isPlaying) {
-            mp.pause()
-        }
-    }
-
-    /**
-     * Libera los recursos del MediaPlayer al destruir la actividad.
-     * Esto asegura que no haya fugas de memoria relacionadas con el reproductor.
-     */
-    override fun onDestroy() {
-        super.onDestroy()
-        mp.release()
+        // Enviar la señal para pausar la música
+        audioIntent.putExtra("ACTION", "PAUSE")
+        startService(audioIntent)
     }
 
     /**
@@ -193,11 +198,13 @@ class CreateGuidedTourActivity : AppCompatActivity() {
 
 
         btnVolver.setOnClickListener {
+
             val siguientePantalla = Intent(this, SelectRolActivity::class.java)
             navigateToNextScreen(siguientePantalla)
         }
 
         btnSiguiente.setOnClickListener {
+
             val seleccionados = checkBoxSeleccionados()
             if (seleccionados.all {!it}) {
                 textoLugaresGuiada.setTextColor(getColor(R.color.red_pure))
