@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CreateGuidedTourActivity"
+    android:background="@color/brown_light">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/linear_layout_texto_pintia"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintHeight_percent="0.08"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/texto_pintia_tour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/texto_loading_app_pintia_tour"
+            android:textAlignment="center"
+            android:textAllCaps="true"
+            android:textColor="@color/black"
+            android:textSize="28dp"
+            android:fontFamily="@font/grandstander_mediana"
+            android:layout_marginTop="7dp"
+            />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/linear_layout_contenido_principal_guiada"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        app:layout_constraintHeight_percent="0.82"
+        app:layout_constraintTop_toBottomOf="@+id/linear_layout_texto_pintia">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/linear_layout_texto_visita_guiada"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:layout_marginTop="5dp"
+            app:layout_constraintTop_toBottomOf="@+id/linear_layout_texto_pintia"
+            >
+
+            <TextView
+                android:id="@+id/texto_visita_guiada"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/texto_select_visit_visita_guiada"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:textColor="@color/black"
+                android:textSize="20dp"
+                android:fontFamily="@font/grandstander_mediana"
+                >
+            </TextView>
+
+            <ImageView
+                android:id="@+id/imagen_reloj_visita_express"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:src="@drawable/pencil_svgrepo_com"
+                app:tint="@color/red_darker"
+                android:layout_marginStart="10dp">
+            </ImageView>
+
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+        <TextView
+            android:id="@+id/texto_lugares_visita_guiada"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/texto_lugares_visita_guiada"
+            android:textAlignment="center"
+            android:textAllCaps="false"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/grandstander_mediana"
+            android:layout_marginTop="10dp"
+            >
+        </TextView>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_margin="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="6dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="6dp"
+                    android:background="@color/white">
+
+                    <androidx.core.widget.NestedScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <androidx.appcompat.widget.LinearLayoutCompat
+                            android:id="@+id/linear_layout_checkbox_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical" />
+
+                    </androidx.core.widget.NestedScrollView>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/linear_layout_botones_volver_siguiente"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/linear_layout_contenido_principal_guiada"
+
+        >
+
+        <Button
+            android:id="@+id/boton_regresar_visita_guiada"
+            android:layout_width="0dp"
+            android:layout_height="57dp"
+            android:layout_weight="0.7"
+            android:layout_marginStart="40dp"
+            android:layout_gravity="center"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Fab.Rounded"
+            android:text="@string/texto_boton_regresar"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:fontFamily="@font/grandstander_mediana"
+            android:backgroundTint="@color/brown_normal"
+            android:singleLine="true">
+        </Button>
+
+        <Button
+            android:id="@+id/boton_siguiente_visita_guiada"
+            android:layout_width="0dp"
+            android:layout_weight="0.7"
+            android:layout_marginEnd="40dp"
+            android:layout_height="57dp"
+            android:layout_gravity="center"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Fab.Rounded"
+            android:text="@string/texto_boton_siguiente"
+            android:textColor="@color/grayish"
+            android:textSize="18sp"
+            android:fontFamily="@font/grandstander_mediana"
+            android:backgroundTint="@color/green_dark"
+            android:layout_marginStart="15dp"
+            android:singleLine="true">
+        </Button>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

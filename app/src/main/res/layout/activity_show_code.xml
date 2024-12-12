@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ShowCodeActivity"
+    android:background="@color/brown_light">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/linear_layout_texto_pintia"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintHeight_percent="0.6"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/texto_pintia_tour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textAllCaps="true"
+            android:text="@string/texto_loading_app_pintia_tour"
+            android:textSize="28dp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/grandstander_mediana"
+            android:layout_marginTop="7dp">
+
+        </TextView>
+
+        <ImageView
+            android:id="@+id/imagen_ciervo_pintia_tour"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:tint="@color/black"
+            android:src="@drawable/imagen_ciervo"
+            android:rotation="270"
+            android:layout_marginStart="15dp">
+        </ImageView>
+
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        app:layout_constraintHeight_percent="0.4"
+        app:layout_constraintTop_toBottomOf="@+id/linear_layout_texto_pintia"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/texto_codigo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textAllCaps="true"
+            android:text="codigo"
+            android:textSize="38dp"
+            android:textColor="@color/black"
+            android:fontFamily="@font/grandstander_mediana"
+            android:layout_marginTop="7dp">
+
+        </TextView>
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/linear_layout_botones_volver_siguiente"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="7"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@+id/linear_layout_contenido_principal_guiada"
+            android:padding="16dp">
+
+
+            <Button
+                android:id="@+id/boton_regresar_visita_guiada"
+                android:layout_width="0dp"
+                android:layout_height="57dp"
+                android:layout_weight="0.8"
+                android:layout_marginStart="30dp"
+                android:layout_gravity="center"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Fab.Rounded"
+                android:text="@string/texto_boton_regresar"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:fontFamily="@font/grandstander_mediana"
+                android:backgroundTint="@color/brown_normal"
+                android:singleLine="true">
+            </Button>
+
+            <Button
+                android:id="@+id/boton_siguiente_visita_guiada"
+                android:layout_width="0dp"
+                android:layout_weight="0.8"
+                android:layout_marginEnd="30dp"
+                android:layout_height="57dp"
+                android:layout_gravity="center"
+                app:shapeAppearanceOverlay="@style/ShapeAppearance.Fab.Rounded"
+                android:text="@string/texto_boton_siguiente"
+                android:textColor="@color/grayish"
+                android:textSize="18sp"
+                android:fontFamily="@font/grandstander_mediana"
+                android:backgroundTint="@color/green_dark"
+                android:layout_marginStart="15dp"
+                android:singleLine="true">
+            </Button>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
